@@ -1,0 +1,24 @@
+@token = token a658c1fcbfae0f4b5f48021b68ed8e4c5ba0b0fd
+
+POST http://127.0.0.1:8000/users/
+Content-Type: application/json
+
+{
+    "email": "test_user@mail.ru",
+    "password": "Blocks_user32"
+}
+
+###
+POST http://127.0.0.1:8000/token/login/ 
+Content-Type: application/json
+
+{
+    "email": "test_user@mail.ru",
+    "password": "Blocks_user32"
+}
+
+
+###
+GET http://127.0.0.1:8000/users/me/
+Content-Type: application/json
+Authorization: {{token}}
