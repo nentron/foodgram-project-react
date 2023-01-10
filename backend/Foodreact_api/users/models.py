@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import (
-    AbstractBaseUser,
+    AbstractUser,
     UserManager
 )
 
@@ -19,11 +19,17 @@ class CustomUserManager(UserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractUser):
     email = models.EmailField(
         verbose_name='email address',
         unique=True,
+        blank=True
     )
-    is_subscribed = models.BooleanField(default=False)
+    username = models.CharField(blank=True,
+                                max_length=255)
+    is_subscribed = models.BooleanField(
+        default=False
+    )
     objects = CustomUserManager()
+    REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'

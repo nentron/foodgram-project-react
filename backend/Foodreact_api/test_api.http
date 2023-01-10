@@ -1,6 +1,6 @@
-@token = token a658c1fcbfae0f4b5f48021b68ed8e4c5ba0b0fd
+@token = token c8f4ab0a7ac0882af3c9b4005283bbcd1bb7c93f
 
-POST http://127.0.0.1:8000/users/
+POST http://127.0.0.1:8000/login/
 Content-Type: application/json
 
 {
@@ -20,5 +20,10 @@ Content-Type: application/json
 
 ###
 GET http://127.0.0.1:8000/users/me/
+Content-Type: application/json
+Authorization: {{token}}
+
+###
+POST http://127.0.0.1:8000/logout/
 Content-Type: application/json
 Authorization: {{token}}
