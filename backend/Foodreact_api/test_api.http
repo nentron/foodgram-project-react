@@ -1,6 +1,6 @@
-@token = token c8f4ab0a7ac0882af3c9b4005283bbcd1bb7c93f
+@token = token 057d4809698987d4a60a35d12399380d4e8ce282
 
-POST http://127.0.0.1:8000/login/
+POST http://127.0.0.1:8000/auth/token/login/
 Content-Type: application/json
 
 {
@@ -19,11 +19,20 @@ Content-Type: application/json
 
 
 ###
-GET http://127.0.0.1:8000/users/me/
+POST http://127.0.0.1:8000/users/set_password/
 Content-Type: application/json
 Authorization: {{token}}
 
+{
+    "current_password": "Blocks_user32",
+    "new_password": "asdf1235464awe"
+}
+
 ###
-POST http://127.0.0.1:8000/logout/
+POST http://127.0.0.1:8000/auth/token/logout/
 Content-Type: application/json
 Authorization: {{token}}
+
+
+###
+GET http://127.0.0.1:8000/ingredients?

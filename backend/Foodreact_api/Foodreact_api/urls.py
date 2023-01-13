@@ -3,19 +3,19 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from users.views import (
-    UserViewSet, TokenObtainView,
-    DestroyTokenView
+    UserViewSet, TokenView,
 )
+from reciept.views import IngredientViewset
 
 
 router = DefaultRouter()
 
 router.register('users', UserViewSet, basename='users')
+router.register('auth/token', TokenView, basename='token')
+router.register('ingredients', IngredientViewset, basename='ingredients')
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
-    path('login/', TokenObtainView.as_view()),
-    path('logout/', DestroyTokenView.as_view()),
 ]

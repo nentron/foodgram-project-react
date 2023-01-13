@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.fields import CurrentUserDefault
 from django.contrib.auth import get_user_model, authenticate
 
 
@@ -23,6 +24,21 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class PasswordSetSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        if not user.check_password(current_password):
+            raise serializers.ValidationError('Wrong current password')
+        user.set_password(new_password)
+        user.save()
+        return data
 
 
 class TokenSerializer(serializers.Serializer):
