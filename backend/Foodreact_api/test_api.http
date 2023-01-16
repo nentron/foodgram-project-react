@@ -1,6 +1,6 @@
-@token = token 057d4809698987d4a60a35d12399380d4e8ce282
+@token = token fd38c58a01a926c21c0b4838403e5117c4670aff
 
-POST http://127.0.0.1:8000/auth/token/login/
+POST http://127.0.0.1:8000/users/
 Content-Type: application/json
 
 {
@@ -9,7 +9,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://127.0.0.1:8000/token/login/ 
+POST http://127.0.0.1:8000/auth/token/login/ 
 Content-Type: application/json
 
 {
@@ -35,4 +35,49 @@ Authorization: {{token}}
 
 
 ###
-GET http://127.0.0.1:8000/ingredients?
+POST http://127.0.0.1:8000/reciepes/
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+      "ingredients": [
+    {
+      "id": 600,
+      "amount": 10
+    }
+  ],
+  "tags": [
+    1,
+    2
+  ],
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+  "name": "test",
+  "text": "test_text",
+  "cooking_time": 1
+}
+
+
+###
+PATCH http://127.0.0.1:8000/reciepes/8/
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+      "ingredients": [
+    {
+      "id": 1000,
+      "amount": 10
+    },
+    {
+      "id": 800,
+      "amount": 100
+    }
+  ],
+  "tags": [
+    1
+  ],
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+  "name": "testadfasdf",
+  "text": "test_text_2adfasdf",
+  "cooking_time": 8
+}

@@ -24,10 +24,11 @@ class Tag(models.Model):
 class Reciept(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    image = models.ImageField()
+    image = models.ImageField(upload_to='reciepes/images/')
     text = models.TextField()
     ingredients = models.ManyToManyField(
         IngredientAmount
     )
     tags = models.ManyToManyField(Tag)
     created = models.DateField(auto_now=True)
+    cooking_time = models.PositiveIntegerField(null=True)
