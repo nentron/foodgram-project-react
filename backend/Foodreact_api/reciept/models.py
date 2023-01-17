@@ -11,7 +11,7 @@ class Ingredient(models.Model):
 
 
 class IngredientAmount(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT)
     amount = models.PositiveIntegerField()
 
 

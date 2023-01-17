@@ -1,4 +1,4 @@
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, pagination
 
 from .mixins import GetListViewset
 from .models import Ingredient, Tag, Reciept
@@ -6,6 +6,8 @@ from .serializers import (
     IngredientSerializer, TagSerializer,
     RecieptSerializer
 )
+from .permissions import AuthorOrSaveMethods
+from .filters import RecieptFilter
 
 
 class IngredientViewset(GetListViewset):
@@ -23,3 +25,6 @@ class TagViewset(GetListViewset):
 class RecieptViewset(viewsets.ModelViewSet):
     queryset = Reciept.objects.all()
     serializer_class = RecieptSerializer
+    pagination_class = (pagination.LimitOffsetPagination)
+    permission_classes = [AuthorOrSaveMethods]
+    filterset_class = RecieptFilter

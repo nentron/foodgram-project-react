@@ -33,7 +33,9 @@ class TagSerializer(serializers.ModelSerializer):
         if isinstance(data, int):
             get_object_or_404(Tag, id=data)
         else:
-            raise serializers.ValidationError(f'Expect int, but got {type(data)}')
+            raise serializers.ValidationError(
+                f'Expect int, but got {type(data)}'
+            )
         return data
 
     def run_validation(self, data):
@@ -68,6 +70,14 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
             'amount': instance.amount
         }
 
+    def run_validation(self, data):
+        value = dict(self.to_internal_value(data))
+        obj, _ = IngredientAmount.objects.get_or_create(
+            ingredient=value.get('ingredient'),
+            amount=value.get('amount')
+        )
+        return obj.pk
+
 
 class RecieptSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
@@ -89,34 +99,23 @@ class RecieptSerializer(serializers.ModelSerializer):
             'text', 'cooking_time'
         )
 
-    def get_list_id_from_ordered(self, data, model):
-        list_id = []
-        for item in data:
-            dict_item = dict(item)
-            obj, _ = model.objects.get_or_create(**dict_item)
-            list_id.append(obj.id)
-        return list_id
-
-    def create(self, validated_data):
+    def __sep_m2m_data(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        ingredients_id = self.get_list_id_from_ordered(
-            ingredients, IngredientAmount
-        )
+        return validated_data, ingredients, tags
+
+    def create(self, validated_data):
+        validated_data, ingredients, tags = self.__sep_m2m_data(validated_data)
         instance = Reciept.objects.create(**validated_data)
-        instance.ingredients.set(ingredients_id)
+        instance.ingredients.set(ingredients)
         instance.tags.set(tags)
         return instance
 
     def update(self, instance, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
-        ingredients_id = self.get_list_id_from_ordered(
-            ingredients, IngredientAmount
-        )
+        validated_data, ingredients, tags = self.__sep_m2m_data(validated_data)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.tags.set(tags)
-        instance.ingredients.set(ingredients_id)
+        instance.ingredients.set(ingredients)
         instance.save()
         return instance
