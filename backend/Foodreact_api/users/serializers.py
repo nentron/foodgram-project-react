@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.fields import CurrentUserDefault
 from django.contrib.auth import get_user_model, authenticate
 
 
@@ -7,6 +6,7 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -18,6 +18,13 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {'password': {'write_only': True}}
         read_only = ['is_subscribed']
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
+        return user.subber.filter(
+            user_id=obj.pk).exists()
 
     def create(self, validated_data):
         user = User(email=validated_data['email'])

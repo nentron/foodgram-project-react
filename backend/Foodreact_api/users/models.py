@@ -54,3 +54,14 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['-date_joined']
+
+
+class Subscription(models.Model):
+    subscriber = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='subber'
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='usertosub'
+    )

@@ -58,7 +58,7 @@ Authorization: {{token}}
 
 
 ###
-PATCH http://127.0.0.1:8000/reciepes/8/
+PATCH http://127.0.0.1:8000/reciepes/
 Content-Type: application/json
 Authorization: {{token}}
 
@@ -83,6 +83,12 @@ Authorization: {{token}}
 }
 
 ###
-GET http://127.0.0.1:8000/reciepes?tags=breakfast&author=1
+POST http://127.0.0.1:8000/recipes/2/favorite/
+Content-Type: application/json
+Authorization: {{token}}
+
+
+###
+GET http://127.0.0.1:8000/recipes/favorites/
 Content-Type: application/json
 Authorization: {{token}}

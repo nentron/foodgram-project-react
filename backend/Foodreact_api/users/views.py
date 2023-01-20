@@ -1,4 +1,4 @@
-from rest_framework.pagination import PageNumberPagination
+from rest_framework import pagination
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,6 +12,8 @@ from .serializers import (
     UserSerializer, TokenSerializer,
     PasswordSetSerializer
 )
+from .models import Subscription
+from reciept.serializers import SubscriptionSerializer
 
 
 User = get_user_model()
@@ -20,7 +22,7 @@ User = get_user_model()
 class UserViewSet(CreateRetrieveListView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = pagination.LimitOffsetPagination
 
     @action(methods=['get'], detail=False,
             permission_classes=[IsAuthenticated])
@@ -36,6 +38,33 @@ class UserViewSet(CreateRetrieveListView):
             context={'request': request})
         serializer.is_valid(raise_exception=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['GET'],
+            detail=False, permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        queryset = request.user.subber.all().select_related('user')
+        results = self.paginate_queryset(queryset)
+        serializer = SubscriptionSerializer(
+            instance=results, many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
+
+    @action(methods=['POST', 'DELETE'],
+            detail=True, permission_classes=[IsAuthenticated])
+    def subscribe(self, request, pk):
+        if request.method == 'DELETE':
+            Subscription.objects.filter(
+                subscriber_id=request.user.pk, user_id=pk
+            ).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        obj, _ = Subscription.objects.get_or_create(
+            subscriber_id=request.user.pk, user_id=pk)
+        serializer = SubscriptionSerializer(
+            obj, context={'request': request})
+        return Response(
+            serializer.data
+        )
 
 
 class TokenView(viewsets.ViewSet):

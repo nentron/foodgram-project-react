@@ -1,14 +1,20 @@
 import base64
 
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from rest_framework import serializers
+from rest_framework import serializers, response
 from django.shortcuts import get_object_or_404
 
+
 from users.serializers import UserSerializer
+from users.models import Subscription
 from .models import (
     Ingredient, Tag, Reciept,
-    IngredientAmount
+    IngredientAmount, FavoriteReciepes
 )
+
+
+User = get_user_model()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -119,3 +125,53 @@ class RecieptSerializer(serializers.ModelSerializer):
         instance.ingredients.set(ingredients)
         instance.save()
         return instance
+
+
+class RecipesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reciept
+        fields = (
+            'id', 'name',
+            'image', 'cooking_time'
+        )
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = (
+            'subscriber', 'user'
+        )
+
+    def to_representation(self, instance):
+        limit_recipes = self.context.get(
+            'request').query_params.get('limit_recipes')
+        if limit_recipes is not None:
+            limit_recipes = int(limit_recipes)
+        user = instance.user
+        recipes_obj = user.recipes.all()
+        recipes = RecipesSerializer(
+            recipes_obj[:limit_recipes], many=True,
+            required=False)
+        return {
+            'email': user.email,
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_subscribed': True,
+            'recipes': recipes.data,
+            'recipes_count': recipes_obj.count()
+        }
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoriteReciepes
+        fields = (
+            'author', 'reciept'
+        )
+
+    def to_representation(self, instance):
+        recipes = RecipesSerializer(instance.reciept)
+        return recipes.data

@@ -17,7 +17,7 @@ router.register('users', UserViewSet, basename='users')
 router.register('auth/token', TokenView, basename='token')
 router.register('ingredients', IngredientViewset, basename='ingredients')
 router.register('tags', TagViewset, basename='tags')
-router.register('reciepes', RecieptViewset, basename='reciepes')
+router.register('recipes', RecieptViewset, basename='recipes')
 
 
 urlpatterns = [
