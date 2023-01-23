@@ -45,8 +45,10 @@ class User(AbstractUser):
     )
     username = models.CharField(blank=True,
                                 max_length=255)
-    is_subscribed = models.BooleanField(
-        default=False
+    subscriptions = models.ManyToManyField(
+        to='self', through='Subscription',
+        blank=True, related_name='following',
+        symmetrical=False
     )
     objects = CustomUserManager()
     REQUIRED_FIELDS = []
@@ -54,6 +56,9 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['-date_joined']
+
+    def is_subscribed(self, sub):
+        return sub in self.following.all()
 
 
 class Subscription(models.Model):
@@ -65,3 +70,14 @@ class Subscription(models.Model):
         User, on_delete=models.CASCADE,
         related_name='usertosub'
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name='Unque constrain', fields=('subscriber', 'user')
+            ),
+            models.CheckConstraint(
+                check=~models.Q(subscriber=models.F('user')),
+                name='You do not follow youself'
+            )
+        ]

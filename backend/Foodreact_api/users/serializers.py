@@ -21,10 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        if not user.is_authenticated:
-            return False
-        return user.subber.filter(
-            user_id=obj.pk).exists()
+        return user.is_authenticated and user.is_subscribed(obj)
 
     def create(self, validated_data):
         user = User(email=validated_data['email'])

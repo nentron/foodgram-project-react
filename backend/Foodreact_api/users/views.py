@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 
@@ -42,7 +43,7 @@ class UserViewSet(CreateRetrieveListView):
     @action(methods=['GET'],
             detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
-        queryset = request.user.subber.all().select_related('user')
+        queryset = request.user.following.all()
         results = self.paginate_queryset(queryset)
         serializer = SubscriptionSerializer(
             instance=results, many=True,
@@ -53,15 +54,13 @@ class UserViewSet(CreateRetrieveListView):
     @action(methods=['POST', 'DELETE'],
             detail=True, permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
         if request.method == 'DELETE':
-            Subscription.objects.filter(
-                subscriber_id=request.user.pk, user_id=pk
-            ).delete()
+            request.user.following.remove(user)
             return Response(status=status.HTTP_204_NO_CONTENT)
-        obj, _ = Subscription.objects.get_or_create(
-            subscriber_id=request.user.pk, user_id=pk)
+        request.user.following.add(user)
         serializer = SubscriptionSerializer(
-            obj, context={'request': request})
+            user, context={'request': request})
         return Response(
             serializer.data
         )

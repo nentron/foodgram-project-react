@@ -28,6 +28,7 @@ class Command(BaseCommand):
     help = 'Загрузка ингердиентов'
 
     def handle(self, *args, **options):
+        logger.info(self.help)
         for root in DATA_ROOTS.iterdir():
             logger.info(f'Загрузка файла {root.name}.')
             f = open(root, 'r', encoding='utf8')

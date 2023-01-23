@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 
 
 from users.serializers import UserSerializer
-from users.models import Subscription
 from .models import (
     Ingredient, Tag, Reciept,
     IngredientAmount, FavoriteReciepes
@@ -136,19 +135,14 @@ class RecipesSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subscription
-        fields = (
-            'subscriber', 'user'
-        )
+class SubscriptionSerializer(UserSerializer):
 
     def to_representation(self, instance):
         limit_recipes = self.context.get(
             'request').query_params.get('limit_recipes')
         if limit_recipes is not None:
             limit_recipes = int(limit_recipes)
-        user = instance.user
+        user = instance
         recipes_obj = user.recipes.all()
         recipes = RecipesSerializer(
             recipes_obj[:limit_recipes], many=True,
@@ -163,15 +157,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             'recipes': recipes.data,
             'recipes_count': recipes_obj.count()
         }
-
-
-class FavoriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FavoriteReciepes
-        fields = (
-            'author', 'reciept'
-        )
-
-    def to_representation(self, instance):
-        recipes = RecipesSerializer(instance.reciept)
-        return recipes.data
