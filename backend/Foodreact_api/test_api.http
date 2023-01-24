@@ -92,6 +92,6 @@ Content-Type: application/json
 Authorization: {{token}}
 
 ###
-GET http://127.0.0.1:8000/recipes?is_in_shopping_cart=True
+DELETE http://127.0.0.1:8000/recipes/3/favorite/
 Content-Type: application/json
 Authorization: {{token}}

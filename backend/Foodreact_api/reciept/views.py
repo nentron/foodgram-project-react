@@ -1,12 +1,13 @@
 from rest_framework import (
     filters, viewsets, pagination,
-    response, status
+    response, status, permissions
 )
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import FileResponse
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from .mixins import GetListViewset
 from .models import (
@@ -25,6 +26,8 @@ User = get_user_model()
 
 
 class IngredientViewset(GetListViewset):
+    """Вьюсет для ингредиентов."""
+
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = [filters.SearchFilter]
@@ -32,18 +35,49 @@ class IngredientViewset(GetListViewset):
 
 
 class TagViewset(GetListViewset):
+    """Вьюсет для тагов."""
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
 
 class RecieptViewset(viewsets.ModelViewSet):
+    """Вьюсет для рецептов."""
+
     queryset = Reciept.objects.all()
     serializer_class = RecieptSerializer
     pagination_class = (pagination.LimitOffsetPagination)
     permission_classes = [AuthorOrSaveMethods]
     filterset_class = RecieptFilter
 
-    @action(methods=['GET'], detail=False)
+    def __post_delete(self, request, model, created_model, pk):
+        reciept = get_object_or_404(model, pk=pk)
+        if request.method == 'POST':
+            obj, created = created_model.objects.get_or_create(
+                author=request.user, reciept=reciept
+            )
+            if created is False:
+                return response.Response(
+                    {'datail': 'Can not add object twice'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            serializer = RecipesSerializer(instance=obj.reciept)
+            return response.Response(serializer.data)
+        try:
+            got_obj = created_model.objects.get(
+                author=request.user,
+                reciept=reciept
+            )
+        except Exception:
+            return response.Response(
+                {'datail': 'object does not exist'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        got_obj.delete()
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['GET'], detail=False,
+            permission_classes=[permissions.IsAuthenticated])
     def favorites(self, request):
         queryset = Reciept.objects.filter(
             reciept_to_favorite__author=request.user
@@ -53,18 +87,14 @@ class RecieptViewset(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['POST', 'DELETE'],
-            detail=True)
-    def favorite(self, request, pk=None):
-        if request.method == 'POST':
-            obj = FavoriteReciepes.objects.create(
-                author=request.user, reciept_id=pk
-            )
-            serializer = RecipesSerializer(instance=obj.reciept)
-            return response.Response(serializer.data)
-        request.user.author_favorite.filter(reciept_id=pk).delete()
-        return response.Response(status=status.HTTP_204_NO_CONTENT)
+            detail=True, permission_classes=[permissions.IsAuthenticated])
+    def favorite(self, request, pk):
+        return self.__post_delete(
+            request, Reciept, FavoriteReciepes, pk
+        )
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['GET'], detail=False,
+            permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
         ingredients = IngredientAmount.objects.filter(
             reciept__reciept_to_cart__author=request.user
@@ -88,13 +118,9 @@ class RecieptViewset(viewsets.ModelViewSet):
 
     @action(
         methods=['DELETE', 'POST'], detail=True,
+        permission_classes=[permissions.IsAuthenticated]
     )
     def shopping_cart(self, request, pk):
-        if request.method == 'POST':
-            obj = ShoppingCart.objects.create(
-                author=request.user, reciept_id=pk
-            )
-            serializer = RecipesSerializer(obj.reciept)
-            return response.Response(serializer.data)
-        request.user.usercart.filter(reciept_id=pk).delete()
-        return response.Response(status=status.HTTP_204_NO_CONTENT)
+        return self.__post_delete(
+            request, Reciept, ShoppingCart, pk
+        )

@@ -13,7 +13,6 @@ from .serializers import (
     UserSerializer, TokenSerializer,
     PasswordSetSerializer
 )
-from .models import Subscription
 from reciept.serializers import SubscriptionSerializer
 
 
@@ -21,6 +20,8 @@ User = get_user_model()
 
 
 class UserViewSet(CreateRetrieveListView):
+    """Вьюсет для пользователя."""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = pagination.LimitOffsetPagination
@@ -67,6 +68,7 @@ class UserViewSet(CreateRetrieveListView):
 
 
 class TokenView(viewsets.ViewSet):
+    """Вьюсет для получения/удаления токена."""
 
     @action(methods=['post'], name='create token',
             detail=False)

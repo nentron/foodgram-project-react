@@ -2,14 +2,14 @@ import base64
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from rest_framework import serializers, response
+from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 
 
 from users.serializers import UserSerializer
 from .models import (
     Ingredient, Tag, Reciept,
-    IngredientAmount, FavoriteReciepes
+    IngredientAmount
 )
 
 
@@ -17,6 +17,7 @@ User = get_user_model()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """Сериалайзер ингредиентов."""
     class Meta:
         model = Ingredient
         fields = (
@@ -27,6 +28,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """Сериалайзер тагов."""
+
     class Meta:
         model = Tag
         fields = (
@@ -49,6 +52,8 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class Base64ImageField(serializers.ImageField):
+    """Сериалайзер поля картинки."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
             info, image = data.split(';base64,')
@@ -58,6 +63,8 @@ class Base64ImageField(serializers.ImageField):
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
+    """Сериалайзер ингридиент и количество."""
+
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient', queryset=Ingredient.objects.all()
     )
@@ -85,16 +92,21 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 
 class RecieptSerializer(serializers.ModelSerializer):
+    """Сериалайзер рецепта."""
+
     image = Base64ImageField()
     ingredients = IngredientAmountSerializer(many=True)
     tags = TagSerializer(many=True)
     author = UserSerializer(default=serializers.CurrentUserDefault())
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Reciept
         fields = (
             'id', 'tags',
             'author', 'ingredients',
+            'is_favorited', 'is_in_shopping_cart',
             'name', 'image',
             'text', 'cooking_time'
         )
@@ -102,6 +114,18 @@ class RecieptSerializer(serializers.ModelSerializer):
             'ingredients', 'tags'
             'image', 'name',
             'text', 'cooking_time'
+        )
+
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        return user.is_authenticated and (
+            user.author_favorite.filter(reciept=obj).exists()
+        )
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        return user.is_authenticated and (
+            user.usercart.filter(reciept=obj).exists()
         )
 
     def __sep_m2m_data(self, validated_data):
@@ -127,6 +151,8 @@ class RecieptSerializer(serializers.ModelSerializer):
 
 
 class RecipesSerializer(serializers.ModelSerializer):
+    """Сериалайзер рецептов."""
+
     class Meta:
         model = Reciept
         fields = (
@@ -136,6 +162,7 @@ class RecipesSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(UserSerializer):
+    """Сериалайзер подписок."""
 
     def to_representation(self, instance):
         limit_recipes = self.context.get(

@@ -6,6 +6,8 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериалайзер пользователя."""
+
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -31,6 +33,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PasswordSetSerializer(serializers.Serializer):
+    """Сериалайзер переустановки пароля."""
+
     current_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
 
@@ -46,6 +50,8 @@ class PasswordSetSerializer(serializers.Serializer):
 
 
 class TokenSerializer(serializers.Serializer):
+    """Сериалайзер получения токена."""
+
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
     token = serializers.CharField(read_only=True)

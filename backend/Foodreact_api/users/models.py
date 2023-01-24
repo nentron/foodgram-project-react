@@ -6,6 +6,7 @@ from django.contrib.auth.models import (
 
 
 class CustomUserManager(UserManager):
+    """Менеджер пользователя."""
 
     def _create_user(self, email, password, **extra_fields):
         if not email:
@@ -38,6 +39,8 @@ class CustomUserManager(UserManager):
 
 
 class User(AbstractUser):
+    """Абстрактный пользователь."""
+
     email = models.EmailField(
         verbose_name='email address',
         unique=True,
@@ -56,12 +59,16 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['-date_joined']
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def is_subscribed(self, sub):
         return sub in self.following.all()
 
 
 class Subscription(models.Model):
+    """Модель для формирования подписок."""
+
     subscriber = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='subber'
@@ -72,6 +79,8 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 name='Unque constrain', fields=('subscriber', 'user')

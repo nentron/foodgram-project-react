@@ -4,6 +4,8 @@ from .models import Reciept, Tag
 
 
 class RecieptFilter(filters.FilterSet):
+    """Фильтрсет для Рецептов."""
+
     tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         to_field_name='slug',
@@ -20,6 +22,7 @@ class RecieptFilter(filters.FilterSet):
         user = self.request.user
         if user.is_authenticated and value is True:
             return queryset.filter(reciept_to_favorite__author=user)
+        return queryset
 
     def shopping_cart_filter(self, queryset, name, value):
         user = self.request.user
