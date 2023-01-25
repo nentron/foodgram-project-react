@@ -12,6 +12,11 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=255)
     measurement_unit = models.CharField(max_length=10)
 
+    class Meta:
+        db_table = 'ingredient'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
     def __str__(self):
         return '{0}-{1}'.format(self.name, self.measurement_unit)
 
@@ -21,6 +26,11 @@ class IngredientAmount(models.Model):
 
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = 'ingredient_amount'
+        verbose_name = 'Компонент'
+        verbose_name_plural = 'Компоненты'
 
     def __str__(self):
         return '{0}:{1}'.format(self.ingredient, self.amount)
@@ -32,6 +42,11 @@ class Tag(models.Model):
     name = models.CharField(max_length=70)
     color = models.CharField(max_length=30)
     slug = models.SlugField(unique=True)
+
+    class Meta:
+        db_table = 'tags'
+        verbose_name = 'Таг'
+        verbose_name_plural = 'Таги'
 
     def __str__(self):
         return self.slug
@@ -56,6 +71,7 @@ class Reciept(models.Model):
     cooking_time = models.PositiveIntegerField(null=True)
 
     class Meta:
+        db_table = 'recipes'
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ['-created']
@@ -74,6 +90,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        db_table = 'shopping_cart'
         constraints = [
             models.UniqueConstraint(
                 name='Unque shoppingcart', fields=('author', 'reciept')
@@ -96,6 +113,7 @@ class FavoriteReciepes(models.Model):
     )
 
     class Meta:
+        db_table = 'favorite_recipes'
         constraints = [
             models.UniqueConstraint(
                 name='Unque favorite', fields=('author', 'reciept')

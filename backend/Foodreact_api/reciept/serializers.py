@@ -18,6 +18,7 @@ User = get_user_model()
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериалайзер ингредиентов."""
+
     class Meta:
         model = Ingredient
         fields = (
