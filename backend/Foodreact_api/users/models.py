@@ -100,4 +100,4 @@ class Subscription(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.user__name} - {self.subscriber__name}'
+        return f'{self.user.email} - {self.subscriber.email}'

@@ -62,22 +62,22 @@ Authorization: {{token}}
 
 
 ###
-POST http://127.0.0.1:8000/recipes/
+POST http://127.0.0.1:8000/api/recipes/
 Content-Type: application/json
 Authorization: {{token}}
 
 {
       "ingredients": [
     {
-      "id": 580,
+      "id": 200,
       "amount": 5
     },
     {
-      "id": 325,
+      "id": 1000,
       "amount": 42
     },
     {
-      "id": 200,
+      "id": 400,
       "amount": 42
     }
   ],
@@ -91,11 +91,11 @@ Authorization: {{token}}
 }
 
 ###
-GET http://127.0.0.1:8000/api/recipes/
+GET http://127.0.0.1:8000/api/recipes/download_shopping_cart/
 Content-Type: application/json
 Authorization: {{token}}
 
 ###
-DELETE http://127.0.0.1:8000/recipes/3/favorite/
+POST http://127.0.0.1:8000/api/recipes/11/shopping_cart/
 Content-Type: application/json
 Authorization: {{token}}

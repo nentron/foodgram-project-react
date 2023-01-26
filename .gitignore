@@ -130,4 +130,8 @@ dmypy.json
 
 # .idea
 .idea
+
+media/
+frontend/
+.media
 test_api.http

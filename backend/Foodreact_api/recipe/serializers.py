@@ -6,7 +6,8 @@ from drf_extra_fields.fields import Base64ImageField
 from users.serializers import UserSerializer
 from .models import (
     Ingredient, Tag, Recipe,
-    IngredientAmount
+    IngredientAmount, FavoriteRecipes,
+    ShoppingCart
 )
 
 
@@ -170,3 +171,43 @@ class SubscriptionSerializer(UserSerializer):
             'recipes': recipes.data,
             'recipes_count': recipes_obj.count()
         }
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    '''Сериалайзер фаворитных рецептов.'''
+
+    author = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all()
+    )
+    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+
+    class Meta:
+        model = FavoriteRecipes
+        fields = (
+            'author', 'recipe'
+        )
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=FavoriteRecipes.objects.all(),
+                fields=['author', 'recipe']
+            )
+        ]
+
+    def to_representation(self, instance):
+        return RecipesSerializer(instance.recipe).data
+
+
+class ShoppingCartSerializer(FavoriteSerializer):
+    '''Сериалайзер покупательской корзины.'''
+
+    class Meta:
+        model = ShoppingCart
+        fields = (
+            'author', 'recipe'
+        )
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=['author', 'recipe']
+            )
+        ]

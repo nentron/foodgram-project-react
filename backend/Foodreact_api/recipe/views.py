@@ -8,6 +8,7 @@ from django.db.models import Sum
 from django.http import FileResponse
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 
 from .mixins import GetListViewset
 from .models import (
@@ -16,10 +17,12 @@ from .models import (
 )
 from .serializers import (
     IngredientSerializer, TagSerializer,
-    RecipeSerializer, RecipesSerializer
+    RecipeSerializer, RecipesSerializer,
+    FavoriteSerializer, ShoppingCartSerializer
 )
 from .permissions import AuthorOrSaveMethods
 from .filters import RecipeFilter
+from .services import create_ingredients_list
 
 
 User = get_user_model()
@@ -51,29 +54,21 @@ class RecipeViewset(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     @staticmethod
-    def __post_delete(request, model, created_model, pk):
+    def __post_delete(request, model, created_model, serializer, pk):
         recipe = get_object_or_404(model, pk=pk)
         if request.method == 'POST':
-            obj, created = created_model.objects.get_or_create(
-                author=request.user, recipe=recipe
+            serializer = serializer(
+                data={'author': request.user.pk,
+                      'recipe': recipe.pk}
             )
-            if created is False:
-                return response.Response(
-                    {'datail': 'Can not add object twice'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            serializer = RecipesSerializer(instance=obj.recipe)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return response.Response(serializer.data)
-        try:
-            got_obj = created_model.objects.get(
-                author=request.user,
-                recipe=recipe
-            )
-        except Exception:
-            return response.Response(
-                {'datail': 'object does not exist'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        got_obj = get_object_or_404(
+            created_model,
+            author=request.user,
+            recipe=recipe
+        )
         got_obj.delete()
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -91,7 +86,8 @@ class RecipeViewset(viewsets.ModelViewSet):
             detail=True, permission_classes=[permissions.IsAuthenticated])
     def favorite(self, request, pk):
         return self.__post_delete(
-            request, Recipe, FavoriteRecipes, pk
+            request, Recipe, FavoriteRecipes,
+            FavoriteSerializer, pk
         )
 
     @action(methods=['GET'], detail=False,
@@ -103,19 +99,13 @@ class RecipeViewset(viewsets.ModelViewSet):
             'ingredient__name',
             'ingredient__measurement_unit'
         ).annotate(amount_sum=Sum('amount', distinct=True))
-        f = open(
-            f'{settings.MEDIA_ROOT}/{request.user}.txt',
-            'w+', encoding='utf8'
-        )
-        for row in ingredients:
-            f.write(
-                '{0} ({1}) - {2}\n'.format(
-                    row.get('ingredient__name'),
-                    row.get('ingredient__measurement_unit'),
-                    row.get('amount_sum')
-                )
-            )
-        return FileResponse(f)
+        response = HttpResponse(headers={
+            'Content-Type': 'text/plain',
+            'Content-Disposition': 'attachment; filename="ingredients.txt"'
+        })
+        ingredient_list = create_ingredients_list(ingredients)
+        response.writelines(ingredient_list)
+        return response
 
     @action(
         methods=['DELETE', 'POST'], detail=True,
@@ -123,5 +113,6 @@ class RecipeViewset(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         return self.__post_delete(
-            request, Recipe, ShoppingCart, pk
+            request, Recipe, ShoppingCart,
+            ShoppingCartSerializer, pk
         )
