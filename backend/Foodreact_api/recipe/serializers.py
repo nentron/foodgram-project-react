@@ -174,7 +174,7 @@ class SubscriptionSerializer(UserSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    '''Сериалайзер фаворитных рецептов.'''
+    """Сериалайзер фаворитных рецептов."""
 
     author = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all()
@@ -198,7 +198,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(FavoriteSerializer):
-    '''Сериалайзер покупательской корзины.'''
+    """Сериалайзер покупательской корзины."""
 
     class Meta:
         model = ShoppingCart
