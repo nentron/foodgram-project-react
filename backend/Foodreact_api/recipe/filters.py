@@ -1,9 +1,9 @@
 from django_filters import rest_framework as filters
 
-from .models import Reciept, Tag
+from .models import Recipe, Tag
 
 
-class RecieptFilter(filters.FilterSet):
+class RecipeFilter(filters.FilterSet):
     """Фильтрсет для Рецептов."""
 
     tags = filters.ModelMultipleChoiceFilter(
@@ -31,5 +31,5 @@ class RecieptFilter(filters.FilterSet):
         return queryset
 
     class Meta:
-        model = Reciept
+        model = Recipe
         fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']

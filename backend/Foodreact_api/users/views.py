@@ -13,7 +13,7 @@ from .serializers import (
     UserSerializer, TokenSerializer,
     PasswordSetSerializer
 )
-from reciept.serializers import SubscriptionSerializer
+from recipe.serializers import SubscriptionSerializer
 
 
 User = get_user_model()

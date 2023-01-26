@@ -11,15 +11,15 @@ from django.shortcuts import get_object_or_404
 
 from .mixins import GetListViewset
 from .models import (
-    Ingredient, Tag, Reciept, FavoriteReciepes,
+    Ingredient, Tag, Recipe, FavoriteRecipes,
     ShoppingCart, IngredientAmount
 )
 from .serializers import (
     IngredientSerializer, TagSerializer,
-    RecieptSerializer, RecipesSerializer
+    RecipeSerializer, RecipesSerializer
 )
 from .permissions import AuthorOrSaveMethods
-from .filters import RecieptFilter
+from .filters import RecipeFilter
 
 
 User = get_user_model()
@@ -41,32 +41,33 @@ class TagViewset(GetListViewset):
     serializer_class = TagSerializer
 
 
-class RecieptViewset(viewsets.ModelViewSet):
+class RecipeViewset(viewsets.ModelViewSet):
     """Вьюсет для рецептов."""
 
-    queryset = Reciept.objects.all()
-    serializer_class = RecieptSerializer
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
     pagination_class = (pagination.LimitOffsetPagination)
     permission_classes = [AuthorOrSaveMethods]
-    filterset_class = RecieptFilter
+    filterset_class = RecipeFilter
 
-    def __post_delete(self, request, model, created_model, pk):
-        reciept = get_object_or_404(model, pk=pk)
+    @staticmethod
+    def __post_delete(request, model, created_model, pk):
+        recipe = get_object_or_404(model, pk=pk)
         if request.method == 'POST':
             obj, created = created_model.objects.get_or_create(
-                author=request.user, reciept=reciept
+                author=request.user, recipe=recipe
             )
             if created is False:
                 return response.Response(
                     {'datail': 'Can not add object twice'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = RecipesSerializer(instance=obj.reciept)
+            serializer = RecipesSerializer(instance=obj.recipe)
             return response.Response(serializer.data)
         try:
             got_obj = created_model.objects.get(
                 author=request.user,
-                reciept=reciept
+                recipe=recipe
             )
         except Exception:
             return response.Response(
@@ -79,8 +80,8 @@ class RecieptViewset(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False,
             permission_classes=[permissions.IsAuthenticated])
     def favorites(self, request):
-        queryset = Reciept.objects.filter(
-            reciept_to_favorite__author=request.user
+        queryset = Recipe.objects.filter(
+            recipe_to_favorite__author=request.user
         )
         results = self.paginate_queryset(queryset)
         serializer = RecipesSerializer(results, many=True)
@@ -90,14 +91,14 @@ class RecieptViewset(viewsets.ModelViewSet):
             detail=True, permission_classes=[permissions.IsAuthenticated])
     def favorite(self, request, pk):
         return self.__post_delete(
-            request, Reciept, FavoriteReciepes, pk
+            request, Recipe, FavoriteRecipes, pk
         )
 
     @action(methods=['GET'], detail=False,
             permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
         ingredients = IngredientAmount.objects.filter(
-            reciept__reciept_to_cart__author=request.user
+            recipe__recipe_to_cart__author=request.user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'
@@ -122,5 +123,5 @@ class RecieptViewset(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         return self.__post_delete(
-            request, Reciept, ShoppingCart, pk
+            request, Recipe, ShoppingCart, pk
         )

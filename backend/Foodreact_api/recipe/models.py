@@ -1,5 +1,4 @@
 from django.db import models
-
 from django.contrib.auth import get_user_model
 
 
@@ -9,8 +8,8 @@ User = get_user_model()
 class Ingredient(models.Model):
     """Модель ингредиентов."""
 
-    name = models.CharField(max_length=255)
-    measurement_unit = models.CharField(max_length=10)
+    name = models.CharField('Название', max_length=255)
+    measurement_unit = models.CharField('Ед. измерения', max_length=10)
 
     class Meta:
         db_table = 'ingredient'
@@ -18,30 +17,32 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return '{0}-{1}'.format(self.name, self.measurement_unit)
+        return f'{self.name}-{self.measurement_unit}'
 
 
 class IngredientAmount(models.Model):
     """Модель ингредиент и количество."""
 
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    amount = models.PositiveIntegerField()
+    ingredient = models.ForeignKey(
+        Ingredient, on_delete=models.CASCADE
+    )
+    amount = models.PositiveIntegerField('Количество')
 
     class Meta:
         db_table = 'ingredient_amount'
-        verbose_name = 'Компонент'
-        verbose_name_plural = 'Компоненты'
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
 
     def __str__(self):
-        return '{0}:{1}'.format(self.ingredient, self.amount)
+        return f'{self.ingredient}:{self.amount}'
 
 
 class Tag(models.Model):
     """Модель тагов."""
 
-    name = models.CharField(max_length=70)
-    color = models.CharField(max_length=30)
-    slug = models.SlugField(unique=True)
+    name = models.CharField('Название', max_length=70)
+    color = models.CharField('Hex-цвет', max_length=30)
+    slug = models.SlugField('Слаг', unique=True)
 
     class Meta:
         db_table = 'tags'
@@ -52,7 +53,7 @@ class Tag(models.Model):
         return self.slug
 
 
-class Reciept(models.Model):
+class Recipe(models.Model):
     """Модель рецепта."""
 
     author = models.ForeignKey(
@@ -60,21 +61,25 @@ class Reciept(models.Model):
         related_name='recipes',
         on_delete=models.CASCADE
     )
-    name = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='reciepes/images/')
-    text = models.TextField()
+    name = models.CharField('Название', max_length=255)
+    image = models.ImageField('Картинка', upload_to='recipes/images/')
+    text = models.TextField('Текст')
     ingredients = models.ManyToManyField(
         IngredientAmount
     )
     tags = models.ManyToManyField(Tag, blank=False)
-    created = models.DateField(auto_now=True)
-    cooking_time = models.PositiveIntegerField(null=True)
+    created = models.DateField('Время создания', auto_now=True)
+    cooking_time = models.PositiveIntegerField('Время готовки, минуты',
+                                               null=True)
 
     class Meta:
         db_table = 'recipes'
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ['-created']
+
+    def __str__(self):
+        return f'Aвтор: {self.author}, название рецепта: {self.name}'
 
 
 class ShoppingCart(models.Model):
@@ -84,8 +89,8 @@ class ShoppingCart(models.Model):
         User, on_delete=models.CASCADE,
         related_name='usercart'
     )
-    reciept = models.ForeignKey(
-        Reciept, related_name='reciept_to_cart',
+    recipe = models.ForeignKey(
+        Recipe, related_name='recipe_to_cart',
         on_delete=models.CASCADE
     )
 
@@ -93,22 +98,25 @@ class ShoppingCart(models.Model):
         db_table = 'shopping_cart'
         constraints = [
             models.UniqueConstraint(
-                name='Unque shoppingcart', fields=('author', 'reciept')
+                name='Unque shoppingcart', fields=('author', 'recipe')
             ),
         ]
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'
 
+    def __str__(self):
+        return f'{self.author} - {self.recipe__name}'
 
-class FavoriteReciepes(models.Model):
+
+class FavoriteRecipes(models.Model):
     """Модель фаворитных рецептов."""
 
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='author_favorite'
     )
-    reciept = models.ForeignKey(
-        Reciept, related_name='reciept_to_favorite',
+    recipe = models.ForeignKey(
+        Recipe, related_name='recipe_to_favorite',
         on_delete=models.CASCADE
     )
 
@@ -116,8 +124,11 @@ class FavoriteReciepes(models.Model):
         db_table = 'favorite_recipes'
         constraints = [
             models.UniqueConstraint(
-                name='Unque favorite', fields=('author', 'reciept')
+                name='Unque favorite', fields=('author', 'recipe')
             ),
         ]
         verbose_name = 'Фаворитный'
         verbose_name_plural = 'Фаворитные'
+
+    def __str__(self):
+        return f'{self.author} - {self.recipe__name}'

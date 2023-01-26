@@ -42,11 +42,12 @@ class User(AbstractUser):
     """Абстрактный пользователь."""
 
     email = models.EmailField(
-        verbose_name='email address',
+        verbose_name='Електронная почта',
         unique=True,
         blank=True
     )
-    username = models.CharField(blank=True,
+    username = models.CharField('Логин',
+                                blank=True,
                                 max_length=255)
     subscriptions = models.ManyToManyField(
         to='self', through='Subscription',
@@ -55,8 +56,7 @@ class User(AbstractUser):
     )
     objects = CustomUserManager()
     REQUIRED_FIELDS = [
-        'username', 'last_name',
-        'first_name', 'password'
+        'username', 'first_name', 'last_name'
     ]
     USERNAME_FIELD = 'email'
 
@@ -65,6 +65,9 @@ class User(AbstractUser):
         ordering = ['-date_joined']
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.email
 
     def is_subscribed(self, sub):
         return sub in self.following.all()
@@ -95,3 +98,6 @@ class Subscription(models.Model):
                 name='You do not follow youself'
             )
         ]
+
+    def __str__(self):
+        return f'{self.user__name} - {self.subscriber__name}'

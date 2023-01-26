@@ -1,14 +1,11 @@
-import base64
-
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
-
+from drf_extra_fields.fields import Base64ImageField
 
 from users.serializers import UserSerializer
 from .models import (
-    Ingredient, Tag, Reciept,
+    Ingredient, Tag, Recipe,
     IngredientAmount
 )
 
@@ -47,20 +44,8 @@ class TagSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def run_validation(self, data):
-        value = self.to_internal_value(data)
+    def validate(self, value):
         return value
-
-
-class Base64ImageField(serializers.ImageField):
-    """Сериалайзер поля картинки."""
-
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith("data:image"):
-            info, image = data.split(';base64,')
-            suffix = info.split('/')[-1]
-            data = ContentFile(base64.b64decode(image), 'image.' + suffix)
-        return super().to_internal_value(data)
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -83,8 +68,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
             'amount': instance.amount
         }
 
-    def run_validation(self, data):
-        value = dict(self.to_internal_value(data))
+    def validate(self, value):
         obj, _ = IngredientAmount.objects.get_or_create(
             ingredient=value.get('ingredient'),
             amount=value.get('amount')
@@ -92,7 +76,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         return obj.pk
 
 
-class RecieptSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
     """Сериалайзер рецепта."""
 
     image = Base64ImageField()
@@ -103,7 +87,7 @@ class RecieptSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
-        model = Reciept
+        model = Recipe
         fields = (
             'id', 'tags',
             'author', 'ingredients',
@@ -120,23 +104,24 @@ class RecieptSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
         return user.is_authenticated and (
-            user.author_favorite.filter(reciept=obj).exists()
+            user.author_favorite.filter(recipe=obj).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
         return user.is_authenticated and (
-            user.usercart.filter(reciept=obj).exists()
+            user.usercart.filter(recipe=obj).exists()
         )
 
-    def __sep_m2m_data(self, validated_data):
+    @staticmethod
+    def __sep_m2m_data(validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         return validated_data, ingredients, tags
 
     def create(self, validated_data):
         validated_data, ingredients, tags = self.__sep_m2m_data(validated_data)
-        instance = Reciept.objects.create(**validated_data)
+        instance = Recipe.objects.create(**validated_data)
         instance.ingredients.set(ingredients)
         instance.tags.set(tags)
         return instance
@@ -155,7 +140,7 @@ class RecipesSerializer(serializers.ModelSerializer):
     """Сериалайзер рецептов."""
 
     class Meta:
-        model = Reciept
+        model = Recipe
         fields = (
             'id', 'name',
             'image', 'cooking_time'

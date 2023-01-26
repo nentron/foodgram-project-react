@@ -1,6 +1,6 @@
-@token = token 6bb57b3dc75250814617c00116d8c72345175a85
+@token = token 01fc1d72346e1c0c7390d08b013463e4b6f206e0
 
-POST http://127.0.0.1:8000/users/
+POST http://127.0.0.1:8000/api/users/
 Content-Type: application/json
 
 {
@@ -9,11 +9,11 @@ Content-Type: application/json
 }
 
 ###
-POST http://127.0.0.1:8000/auth/token/login/ 
+POST http://127.0.0.1:8000/api/auth/token/login/ 
 Content-Type: application/json
 
 {
-    "email": "test_user@mail.ru",
+    "email": "test@mail.ru",
     "password": "Blocks_user32"
 }
 
@@ -35,15 +35,19 @@ Authorization: {{token}}
 
 
 ###
-POST http://127.0.0.1:8000/reciepes/
+GET http://127.0.0.1:8000/api/recipes/
 Content-Type: application/json
 Authorization: {{token}}
 
 {
-      "ingredients": [
+  "ingredients": [
     {
-      "id": 450,
+      "id": 233,
       "amount": 25
+    },
+    {
+      "id": 400,
+      "amount": 15
     }
   ],
   "tags": [
@@ -78,7 +82,7 @@ Authorization: {{token}}
     }
   ],
   "tags": [
-    3
+    2
   ],
   "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
   "name": "testadfasdf",
@@ -87,7 +91,7 @@ Authorization: {{token}}
 }
 
 ###
-GET http://127.0.0.1:8000/users/
+GET http://127.0.0.1:8000/api/recipes/
 Content-Type: application/json
 Authorization: {{token}}
 

@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from .models import User
-from reciept.models import (
-    Reciept, IngredientAmount,
+from .models import User, Subscription
+from recipe.models import (
+    Recipe, IngredientAmount,
     Ingredient, Tag
 )
 
@@ -16,7 +16,7 @@ class AuthorAdmin(admin.ModelAdmin):
     search_fields = ['email', 'username']
 
 
-class RecieptAdmin(admin.ModelAdmin):
+class RecipeAdmin(admin.ModelAdmin):
     '''Модель адимнпанели рецептов.'''
 
     readonly_fields = ('count_favorite',)
@@ -26,7 +26,7 @@ class RecieptAdmin(admin.ModelAdmin):
 
     @admin.display(description='Favorite count')
     def count_favorite(self, obj):
-        return obj.reciept_to_favorite.all().count()
+        return obj.recipe_to_favorite.all().count()
 
 
 class IngredientAdmin(admin.ModelAdmin):
@@ -38,7 +38,8 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, AuthorAdmin)
-admin.site.register(Reciept, RecieptAdmin)
+admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(IngredientAmount)
 admin.site.register(Tag)
+admin.site.register(Subscription)
