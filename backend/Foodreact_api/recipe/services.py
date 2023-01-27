@@ -8,7 +8,3 @@ def create_ingredients_list(ingredients):
         )
         ingredients_list.append(line)
     return ingredients_list
-
-
-if __name__ == '__main__':
-    create_ingredients_list
