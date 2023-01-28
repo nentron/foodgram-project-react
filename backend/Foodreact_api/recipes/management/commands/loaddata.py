@@ -6,7 +6,7 @@ from csv import DictReader
 
 from django.core.management.base import BaseCommand
 
-from recipe.models import Ingredient
+from recipes.models import Ingredient
 
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s"

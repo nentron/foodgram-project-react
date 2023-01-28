@@ -45,9 +45,6 @@ class TagSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def validate(self, value):
-        return value
-
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
     """Сериалайзер ингридиент и количество."""
@@ -68,13 +65,6 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
             'measurement_unit': obj.measurement_unit,
             'amount': instance.amount
         }
-
-    def validate(self, value):
-        obj, _ = IngredientAmount.objects.get_or_create(
-            ingredient=value.get('ingredient'),
-            amount=value.get('amount')
-        )
-        return obj.pk
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -120,19 +110,35 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         return validated_data, ingredients, tags
 
+    @staticmethod
+    def __get_ingredients_id(ingredients_data):
+        ingredients_id_list = []
+        for ingredient_amount in ingredients_data:
+            obj, _ = IngredientAmount.objects.get_or_create(
+                **ingredient_amount
+            )
+            ingredients_id_list.append(obj.pk)
+        return ingredients_id_list
+
     def create(self, validated_data):
-        validated_data, ingredients, tags = self.__sep_m2m_data(validated_data)
+        validated_data, ingredients_data, tags = self.__sep_m2m_data(
+            validated_data
+        )
         instance = Recipe.objects.create(**validated_data)
-        instance.ingredients.set(ingredients)
+        ingredients_id_list = self.__get_ingredients_id(ingredients_data)
+        instance.ingredients.set(ingredients_id_list)
         instance.tags.set(tags)
         return instance
 
     def update(self, instance, validated_data):
-        validated_data, ingredients, tags = self.__sep_m2m_data(validated_data)
+        validated_data, ingredients_data, tags = self.__sep_m2m_data(
+            validated_data
+        )
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        ingredients_id_list = self.__get_ingredients_id(ingredients_data)
         instance.tags.set(tags)
-        instance.ingredients.set(ingredients)
+        instance.ingredients.set(ingredients_id_list)
         instance.save()
         return instance
 

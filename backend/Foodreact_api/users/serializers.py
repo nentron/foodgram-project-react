@@ -26,8 +26,9 @@ class UserSerializer(serializers.ModelSerializer):
         return user.is_authenticated and user.is_subscribed(obj)
 
     def create(self, validated_data):
-        user = User(email=validated_data['email'])
-        user.set_password(validated_data['password'])
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
         user.save()
         return user
 

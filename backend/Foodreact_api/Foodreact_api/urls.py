@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from users.views import (
     UserViewSet, TokenView,
 )
-from recipe.views import (
+from recipes.views import (
     IngredientViewset,
     TagViewset, RecipeViewset
 )
