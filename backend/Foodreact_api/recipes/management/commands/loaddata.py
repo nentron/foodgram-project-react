@@ -20,7 +20,7 @@ logger.addHandler(stream_handler)
 logger.setLevel(logging.INFO)
 
 
-ROOT = PurePath(__file__).parents[5]
+ROOT = PurePath(__file__).parents[3]
 DATA_ROOTS = Path(ROOT) / 'data'
 
 

@@ -55,7 +55,7 @@ class TokenSerializer(serializers.Serializer):
 
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
-    token = serializers.CharField(read_only=True)
+    auth_token = serializers.CharField(read_only=True)
 
     def validate(self, data):
         email = data.get('email')

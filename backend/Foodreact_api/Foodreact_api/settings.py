@@ -8,7 +8,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'asdfasdfsdf223541ljytWQERSSADSd')
 
 DEBUG = os.getenv('DEBUG', True)
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 AUTH_USER_MODEL = 'users.User'
@@ -64,8 +64,8 @@ DATABASES = {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.getenv('DB_NAME', 'postgres'),
         'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'qwerty12345'),
-        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'qwerga1234'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432')
     }
 }
