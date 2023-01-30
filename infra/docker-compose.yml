@@ -18,7 +18,7 @@ services:
     image: nentron/foodgram:latest
     restart: always
     volumes:
-      - static_value:/usr/share/nginx/html/static/
+      - static_value:/app/static/
       - media_value:/app/media/
     depends_on:
       - db
