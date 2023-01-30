@@ -33,6 +33,7 @@ class IngredientViewset(GetListViewset):
     serializer_class = IngredientSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['^name']
+    pagination_class = ()
 
 
 class TagViewset(GetListViewset):
@@ -40,6 +41,7 @@ class TagViewset(GetListViewset):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = ()
 
 
 class RecipeViewset(viewsets.ModelViewSet):

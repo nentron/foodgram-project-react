@@ -1,7 +1,9 @@
 version: '3.3'
 services:
   frontend:
-    image: frontend:latest
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
   db:
@@ -13,10 +15,10 @@ services:
     depends_on:
       - frontend
   web:
-    image: nentron/foodgram:v0.02
+    image: nentron/foodgram:latest
     restart: always
     volumes:
-      - static_value:/app/static/
+      - static_value:/usr/share/nginx/html/static/
       - media_value:/app/media/
     depends_on:
       - db
@@ -25,6 +27,7 @@ services:
     command: bash -c "
       python manage.py migrate && 
       python manage.py collectstatic --noinput &&
+      python manage.py loaddata &&
       gunicorn Foodreact_api.wsgi:application --bind 0:8000"
   nginx:
     image: nginx:1.19.3
