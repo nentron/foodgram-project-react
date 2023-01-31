@@ -1,5 +1,5 @@
 from rest_framework import (
-    filters, viewsets, pagination,
+    viewsets, pagination,
     response, status, permissions
 )
 from rest_framework.decorators import action
