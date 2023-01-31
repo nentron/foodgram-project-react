@@ -1,6 +1,7 @@
 from rest_framework import (
     viewsets, pagination,
-    response, status, permissions
+    response, status, permissions,
+    filters
 )
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
@@ -32,6 +33,7 @@ class IngredientViewset(GetListViewset):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = [CustomSearchFilter]
+    search_fields = ['^name']
     pagination_class = None
 
 
