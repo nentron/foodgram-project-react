@@ -1,7 +1,6 @@
 from rest_framework import (
     viewsets, pagination,
-    response, status, permissions,
-    filters
+    response, status, permissions
 )
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
