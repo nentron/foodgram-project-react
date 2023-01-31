@@ -19,7 +19,7 @@ from .serializers import (
     FavoriteSerializer, ShoppingCartSerializer
 )
 from .permissions import AuthorOrSaveMethods
-from .filters import RecipeFilter
+from .filters import RecipeFilter, CustomSearchFilter
 from .services import create_ingredients_list
 
 
@@ -31,8 +31,7 @@ class IngredientViewset(GetListViewset):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['^name']
+    filter_backends = [CustomSearchFilter]
     pagination_class = None
 
 
