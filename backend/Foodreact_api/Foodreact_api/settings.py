@@ -1,12 +1,19 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+root = BASE_DIR.parents[1] / 'infra' / '.env'
+
+load_dotenv(root) or load_dotenv()
+
+
 SECRET_KEY = os.getenv('SECRET_KEY', 'asdfasdfsdf223541ljytWQERSSADSd')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = ['*']
 
@@ -65,7 +72,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME', 'postgres'),
         'USER': os.getenv('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'dog234'),
-        'HOST': os.getenv('DB_HOST', default='127.0.0.1'),
+        'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432')
     }
 }
@@ -112,6 +119,6 @@ REST_FRAMEWORK = {
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/html/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
