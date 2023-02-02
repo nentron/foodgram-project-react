@@ -1,6 +1,6 @@
 from rest_framework import (
-    viewsets, pagination,
-    response, status, permissions
+    viewsets, response,
+    status, permissions
 )
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
@@ -18,6 +18,7 @@ from .serializers import (
     RecipeSerializer, RecipesSerializer,
     FavoriteSerializer, ShoppingCartSerializer
 )
+from .pagination import LimitPageNumberPagination
 from .permissions import AuthorOrSaveMethods
 from .filters import RecipeFilter, CustomSearchFilter
 from .services import create_ingredients_list
@@ -49,8 +50,7 @@ class RecipeViewset(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    pagination_class = (pagination.LimitOffsetPagination)
-    default_limit = 6
+    pagination_class = (LimitPageNumberPagination)
     permission_classes = [AuthorOrSaveMethods]
     filterset_class = RecipeFilter
 
