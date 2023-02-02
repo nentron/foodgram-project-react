@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-root = BASE_DIR.parents[1] / 'infra' / '.env'
 
-load_dotenv(root) or load_dotenv()
+
+load_dotenv()
 
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'asdfasdfsdf223541ljytWQERSSADSd')
