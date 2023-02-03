@@ -30,8 +30,8 @@ Foodgram - это проект созданный для публикации р
 
 ## Полезные ссылки:
 
-Ссылка на развернутый проект: [foodgram]
-Ссылка на redoc проекта: [redoc]
+- Ссылка на развернутый проект: [foodgram]
+- Ссылка на redoc проекта: [redoc]
 
 [foodgram]: <http://foodreactor.ddns.net/>
 [redoc]: <http://foodreactor.ddns.net/redoc/>
