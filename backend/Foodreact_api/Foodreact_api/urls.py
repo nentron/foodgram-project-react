@@ -1,8 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
-from django.views.generic import TemplateView
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
-from rest_framework.schemas import get_schema_view
+from drf_yasg import openapi, views
 
 from users.views import (
     UserViewSet, TokenView,
@@ -13,7 +12,14 @@ from recipes.views import (
 )
 
 
-schema_view = get_schema_view(title='FoodGram')
+schema_view = views.get_schema_view(
+    openapi.Info(
+        title='FoodGram Api',
+        default_version='v1',
+        description='Api документация для Foodgram'
+    ),
+    public=True
+)
 
 
 router = DefaultRouter()
@@ -28,17 +34,10 @@ router.register('recipes', RecipeViewset, basename='recipes')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path(
-        'openapi',
-        schema_view,
-        name='openapi-schema'
-    ),
-    path(
-        'api/docs/',
-        TemplateView.as_view(
-            template_name='redoc.html',
-            extra_context={'schema_url': 'openapi-schema'}
+    re_path(
+        r'^redoc/$', schema_view.with_ui(
+            'redoc', cache_timeout=0
         ),
-        name='redoc'
+        name='schema-redoc'
     )
 ]
