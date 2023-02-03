@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
-from rest_framework.routers import DefaultRouter
+from rest_framework import routers, permissions
 from drf_yasg import openapi, views
 
 from users.views import (
@@ -18,11 +18,12 @@ schema_view = views.get_schema_view(
         default_version='v1',
         description='Api документация для Foodgram'
     ),
-    public=True
+    public=True,
+    permission_classes=[permissions.AllowAny]
 )
 
 
-router = DefaultRouter()
+router = routers.DefaultRouter()
 
 router.register('users', UserViewSet, basename='users')
 router.register('auth/token', TokenView, basename='token')
