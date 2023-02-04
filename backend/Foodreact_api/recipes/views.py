@@ -99,7 +99,7 @@ class RecipeViewset(viewsets.ModelViewSet):
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'
-        ).annotate(amount_sum=Sum('amount', distinct=True))
+        ).annotate(amount_sum=Sum('amount'))
         response = HttpResponse(headers={
             'Content-Type': 'text/plain',
             'Content-Disposition': 'attachment; filename="ingredients.txt"'

@@ -1,4 +1,3 @@
-from rest_framework import pagination
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
@@ -14,6 +13,7 @@ from .serializers import (
     PasswordSetSerializer
 )
 from recipes.serializers import SubscriptionSerializer
+from recipes.pagination import LimitPageNumberPagination
 
 
 User = get_user_model()
@@ -24,7 +24,7 @@ class UserViewSet(CreateRetrieveListView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = pagination.LimitOffsetPagination
+    pagination_class = LimitPageNumberPagination
 
     @action(methods=['get'], detail=False,
             permission_classes=[IsAuthenticated])

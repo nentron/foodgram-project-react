@@ -158,14 +158,14 @@ class SubscriptionSerializer(UserSerializer):
     """Сериалайзер подписок."""
 
     def to_representation(self, instance):
-        limit_recipes = self.context.get(
-            'request').query_params.get('limit_recipes')
-        if limit_recipes is not None:
-            limit_recipes = int(limit_recipes)
+        recipes_limit = self.context.get(
+            'request').query_params.get('recipes_limit')
+        if recipes_limit is not None:
+            recipes_limit = int(recipes_limit)
         user = instance
         recipes_obj = user.recipes.all()
         recipes = RecipesSerializer(
-            recipes_obj[:limit_recipes], many=True,
+            recipes_obj[:recipes_limit], many=True,
             required=False)
         return {
             'email': user.email,
